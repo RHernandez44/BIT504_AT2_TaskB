@@ -6,11 +6,14 @@ import javax.swing.JPanel;
 import java.awt.Color;
 
 public class PongPanel extends JPanel implements ActionListener, KeyListener {
+	
+	// Constants
+	private final static Color BACKGROUND_COLOUR = Color.BLACK;
 
 	public PongPanel() {
 		
 		// Constructor
-		setBackground(Color.BLACK);
+		setBackground(BACKGROUND_COLOUR);
 		
 	}
 	// Key press Methods
