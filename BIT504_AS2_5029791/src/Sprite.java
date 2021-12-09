@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Rectangle;
 
 public class Sprite {
 	
@@ -6,6 +7,7 @@ public class Sprite {
 
 	// Class Var
 	private int xPosition, yPosition;
+	private int initialXPosition, initialYPosition;
 	private int xVelocity, yVelocity;
 	private int width, height;
 	private Color colour;
@@ -20,12 +22,14 @@ public class Sprite {
 	 public Color getColour() {return colour;}
 	 
 	 // Setter methods
-	 public void setxPosition(int xPosition) {
-	         this.xPosition = xPosition;
-	     }
-	 public void setyPosition(int yPosition) {
-	         this.yPosition = yPosition;
-	     }
+	 public void setInitialPosition(int initialXPosition, int initialYPosition) {
+		 this.initialXPosition = initialXPosition;
+		 this.initialYPosition = initialYPosition;
+	 }
+	 public void resetToInitialPosition() {
+		 setxPosition(initialXPosition);
+	     setyPosition(initialYPosition);
+	 }
 	 public void setxVelocity(int xVelocity) {
 	         this.xVelocity = xVelocity;
 	     }
@@ -40,6 +44,13 @@ public class Sprite {
 	     }
 	 public void setColour(Color colour) {
 		 this.colour = colour;
+	 }
+	 // Sets position
+	 public void setxPosition(int xPosition) {
+		 this.xPosition = xPosition;
+	 }
+	 public void setyPosition(int yPosition) {
+		 this.yPosition = yPosition;
 	 }
 	 // Sets ball to position INSIDE window
 	 public void setXPosition(int newX, int panelWidth) {
@@ -58,4 +69,9 @@ public class Sprite {
 	          yPosition = panelHeight - height;
 	      }
 	 }
+	 
+	 // Paints Sprite objects
+	 public Rectangle getRectangle() {
+         return new Rectangle(getxPosition(), getyPosition(), getWidth(), getHeight());
+     }
 }
