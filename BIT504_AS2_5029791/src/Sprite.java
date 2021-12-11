@@ -53,15 +53,15 @@ public class Sprite {
 		 this.yPosition = yPosition;
 	 }
 	 // Sets ball to position INSIDE window
-	 public void setXPosition(int newX, int panelWidth) {
+	 public void setxPosition(int newX, int panelWidth) {
 		xPosition = newX;
-		if (xPosition > 0)
+		if (xPosition < 0)
 			 xPosition = 0;
 	 	else if (xPosition + width > panelWidth)
 		 xPosition = panelWidth - width;
 	     
 	 }
-	 public void setYPosition(int newY, int panelHeight) {
+	 public void setyPosition(int newY, int panelHeight) {
 	      yPosition = newY;
 	      if(yPosition < 0) {
 	          yPosition = 0;
