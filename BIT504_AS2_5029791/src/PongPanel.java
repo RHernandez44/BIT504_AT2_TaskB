@@ -20,15 +20,53 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 	Ball ball;
 	Paddle paddle1;
 	Paddle paddle2;
+	private final static int BALL_MOVEMENT_SPEED = 2;
 	
+	// Constructor
 	public PongPanel() {
 		
-		// Constructor
 		setBackground(BACKGROUND_COLOUR);
 		Timer timer = new Timer(TIMER_DELAY, this);
         timer.start();	// Creates timer loop to call actionPerformed()
+        addKeyListener(this);
+        setFocusable(true);		
+	}
+	
+	// Ball object velocities
+	public void moveObject(Sprite obj) {
+		
+		// Increases x/y pos according to its velocity
+		obj.setxPosition(obj.getxPosition() + obj.getxVelocity(), getWidth());
+		obj.setyPosition(obj.getyPosition() + obj.getyVelocity(), getHeight());		
+	}
+	
+	public void checkWallBounce() {
+
+		if ( ball.getxPosition() <= 0) {
+			// Hit LH side screen
+			ball.setxVelocity(-ball.getxVelocity());
+			resetBall();
+		} else if (ball.getxPosition() >= getWidth() - ball.getWidth()) {
+			// Hit right side of screen
+			ball.setxVelocity(-ball.getxVelocity());
+			resetBall();
+		}
+
+		if (ball.getyPosition() <= 0 ) {
+			// Hit bottom of screen
+			ball.setyVelocity(-ball.getyVelocity());
+		} else if (ball.getyPosition() >= getHeight() - ball.getHeight()) {
+			// hit top
+			ball.setyVelocity(-ball.getyVelocity());	    	   
+		}
+	}
+		
+	public void resetBall() {
+		
+		ball.resetToInitialPosition();
 		
 	}
+	
 	// Key press Methods
 	@Override
 	public void keyTyped(KeyEvent event) {
@@ -38,14 +76,26 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent event) {
-		// TODO Auto-generated method stub
-		
+		if(event.getKeyCode() == KeyEvent.VK_UP) { // Paddle2 Up/Down
+            paddle2.setyVelocity(-1);
+       } else if(event.getKeyCode() == KeyEvent.VK_DOWN) {
+            paddle2.setyVelocity(1);
+        }
+		if(event.getKeyCode() == KeyEvent.VK_W) { // Paddle1 Up/Down
+			paddle1.setyVelocity(-1);
+		} else if(event.getKeyCode() == KeyEvent.VK_S) {
+			paddle1.setyVelocity(1);
+		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent event) {
-		// TODO Auto-generated method stub
-		
+		if(event.getKeyCode() == KeyEvent.VK_UP || event.getKeyCode() == KeyEvent.VK_DOWN) { // Paddle2 Up/Down
+            paddle2.setyVelocity(0);
+        }
+		if(event.getKeyCode() == KeyEvent.VK_W || event.getKeyCode() == KeyEvent.VK_S) { // Paddle1 Up/Down
+			paddle1.setyVelocity(0);
+		}
 	}
 
 	@Override
@@ -72,11 +122,17 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 	private void update() {
         switch(gameState) {
             case Initialising: {
-                createObjects();
+               createObjects();
                gameState = GameState.Playing;
+               ball.setxVelocity(BALL_MOVEMENT_SPEED);
+               ball.setyVelocity(BALL_MOVEMENT_SPEED);
                 break;
             }
             case Playing: {
+            	moveObject(paddle2);
+            	moveObject(paddle1);
+            	moveObject(ball); // Move Ball
+            	checkWallBounce(); // Check bounce
                 break;
            }
            case GameOver: {
