@@ -33,8 +33,7 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 	}
 	
 	// Ball object velocities
-	public void moveObject(Sprite obj) {
-		
+	public void moveObject(Sprite obj) {		
 		// Increases x/y pos according to its velocity
 		obj.setxPosition(obj.getxPosition() + obj.getxVelocity(), getWidth());
 		obj.setyPosition(obj.getyPosition() + obj.getyVelocity(), getHeight());		
@@ -60,6 +59,15 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 			ball.setyVelocity(-ball.getyVelocity());	    	   
 		}
 	}
+	
+	public void checkPaddleBounce() {
+		if(ball.getxVelocity() < 0 && ball.getRectangle().intersects(paddle1.getRectangle())) {
+	          ball.setxVelocity(BALL_MOVEMENT_SPEED);
+	      }
+	      if(ball.getxVelocity() > 0 && ball.getRectangle().intersects(paddle2.getRectangle())) {
+	          ball.setxVelocity(-BALL_MOVEMENT_SPEED);
+	      }
+	}
 		
 	public void resetBall() {
 		
@@ -77,14 +85,14 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 	@Override
 	public void keyPressed(KeyEvent event) {
 		if(event.getKeyCode() == KeyEvent.VK_UP) { // Paddle2 Up/Down
-            paddle2.setyVelocity(-1);
+            paddle2.setyVelocity(-2);
        } else if(event.getKeyCode() == KeyEvent.VK_DOWN) {
-            paddle2.setyVelocity(1);
+            paddle2.setyVelocity(2);
         }
 		if(event.getKeyCode() == KeyEvent.VK_W) { // Paddle1 Up/Down
-			paddle1.setyVelocity(-1);
+			paddle1.setyVelocity(-2);
 		} else if(event.getKeyCode() == KeyEvent.VK_S) {
-			paddle1.setyVelocity(1);
+			paddle1.setyVelocity(2);
 		}
 	}
 
@@ -133,6 +141,7 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
             	moveObject(paddle1);
             	moveObject(ball); // Move Ball
             	checkWallBounce(); // Check bounce
+            	checkPaddleBounce();
                 break;
            }
            case GameOver: {
