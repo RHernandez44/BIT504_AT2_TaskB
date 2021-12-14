@@ -18,6 +18,8 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 	private final static int TIMER_DELAY = 5;
 	// Ball object
 	Ball ball;
+	Paddle paddle1;
+	Paddle paddle2;
 	
 	public PongPanel() {
 		
@@ -59,24 +61,39 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 		
 		// Ball Variable
 		ball = new Ball(getWidth(),getHeight());
+		// Paddles
+		paddle1 = new Paddle(Player.One, getWidth(), getHeight());
+		paddle2 = new Paddle(Player.Two, getWidth(), getHeight());
 	}
 	
 	// Game initialised variable used in the update() method
-	boolean gameInitialised = false;
+	GameState gameState = GameState.Initialising;
 	
 	private void update() {
-		if(!gameInitialised) {
-			createObjects();
-			gameInitialised = true;
-		}
-	}
+        switch(gameState) {
+            case Initialising: {
+                createObjects();
+               gameState = GameState.Playing;
+                break;
+            }
+            case Playing: {
+                break;
+           }
+           case GameOver: {
+               break;
+           }
+       }
+   }
 	
 	@Override
 	 public void paintComponent(Graphics g) { // Draws a shape
 	     super.paintComponent(g);
 	     paintDottedLine(g);
-	     if (gameInitialised) {
+	     if (gameState != GameState.Initialising) {
 	    	 paintSprite(g, ball);
+	    	 paintSprite(g, paddle1);
+	    	 paintSprite(g, paddle2);
+	    	 
 	     }
 	 }
 	
