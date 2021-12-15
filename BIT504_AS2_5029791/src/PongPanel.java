@@ -1,13 +1,14 @@
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.Stroke;
-import java.awt.Graphics2D;
-import java.awt.BasicStroke;
+import java.awt.Font;
+
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -21,6 +22,12 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 	Paddle paddle1;
 	Paddle paddle2;
 	private final static int BALL_MOVEMENT_SPEED = 2;
+	// Game initialised variable used in the update() method
+	GameState gameState = GameState.Initialising;
+	// Win State 
+	private final static int POINTS_TO_WIN = 5;  
+	int player1Score = 0, player2Score = 0;
+	Player gameWinner;
 	
 	// Constructor
 	public PongPanel() {
@@ -32,8 +39,64 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
         setFocusable(true);		
 	}
 	
+	private void update() {
+		
+        switch(gameState) {
+            case Initialising: {
+               createObjects();
+               gameState = GameState.Playing;
+               ball.setxVelocity(BALL_MOVEMENT_SPEED);
+               ball.setyVelocity(BALL_MOVEMENT_SPEED);
+                break;
+            }
+            case Playing: {
+            	moveObject(paddle2);
+            	moveObject(paddle1);
+            	moveObject(ball); // Move Ball
+            	checkWallBounce(); // Check bounce
+            	checkPaddleBounce();
+            	checkWin();
+                break;
+           }
+           case GameOver: {
+               break;
+           }
+       }
+   }
+
+	public void createObjects() { // Creates Balls & Paddles
+
+		// Ball Variable
+		ball = new Ball(getWidth(),getHeight());
+		// Paddles
+		paddle1 = new Paddle(Player.One, getWidth(), getHeight());
+		paddle2 = new Paddle(Player.Two, getWidth(), getHeight());
+	}
+	
+	public void addScore(Player player) { // Adds +1 to given playerScore
+		
+		if (player == player.One)
+			player1Score++;
+		if (player == player.Two)
+			player2Score++;
+	}
+	
+	public void checkWin() {
+	
+		if (player1Score >= POINTS_TO_WIN) {
+		gameWinner = Player.One;
+		gameState = GameState.GameOver;
+		} else if (player2Score >= POINTS_TO_WIN) {
+			gameWinner = Player.Two;
+			gameState = GameState.GameOver;
+		}
+		
+	}
+	
+	
 	// Ball object velocities
 	public void moveObject(Sprite obj) {		
+		
 		// Increases x/y pos according to its velocity
 		obj.setxPosition(obj.getxPosition() + obj.getxVelocity(), getWidth());
 		obj.setyPosition(obj.getyPosition() + obj.getyVelocity(), getHeight());		
@@ -44,10 +107,12 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 		if ( ball.getxPosition() <= 0) {
 			// Hit LH side screen
 			ball.setxVelocity(-ball.getxVelocity());
+			addScore(Player.Two);
 			resetBall();
 		} else if (ball.getxPosition() >= getWidth() - ball.getWidth()) {
 			// Hit right side of screen
 			ball.setxVelocity(-ball.getxVelocity());
+			addScore(Player.One);
 			resetBall();
 		}
 
@@ -61,10 +126,12 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 	}
 	
 	public void checkPaddleBounce() {
+		
 		if(ball.getxVelocity() < 0 && ball.getRectangle().intersects(paddle1.getRectangle())) {
 	          ball.setxVelocity(BALL_MOVEMENT_SPEED);
 	      }
-	      if(ball.getxVelocity() > 0 && ball.getRectangle().intersects(paddle2.getRectangle())) {
+		
+	    if(ball.getxVelocity() > 0 && ball.getRectangle().intersects(paddle2.getRectangle())) {
 	          ball.setxVelocity(-BALL_MOVEMENT_SPEED);
 	      }
 	}
@@ -115,41 +182,6 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 		
 	}
 	
-	public void createObjects() { // Creates Balls & Paddles
-		
-		// Ball Variable
-		ball = new Ball(getWidth(),getHeight());
-		// Paddles
-		paddle1 = new Paddle(Player.One, getWidth(), getHeight());
-		paddle2 = new Paddle(Player.Two, getWidth(), getHeight());
-	}
-	
-	// Game initialised variable used in the update() method
-	GameState gameState = GameState.Initialising;
-	
-	private void update() {
-        switch(gameState) {
-            case Initialising: {
-               createObjects();
-               gameState = GameState.Playing;
-               ball.setxVelocity(BALL_MOVEMENT_SPEED);
-               ball.setyVelocity(BALL_MOVEMENT_SPEED);
-                break;
-            }
-            case Playing: {
-            	moveObject(paddle2);
-            	moveObject(paddle1);
-            	moveObject(ball); // Move Ball
-            	checkWallBounce(); // Check bounce
-            	checkPaddleBounce();
-                break;
-           }
-           case GameOver: {
-               break;
-           }
-       }
-   }
-	
 	@Override
 	 public void paintComponent(Graphics g) { // Draws a shape
 	     super.paintComponent(g);
@@ -158,9 +190,43 @@ public class PongPanel extends JPanel implements ActionListener, KeyListener {
 	    	 paintSprite(g, ball);
 	    	 paintSprite(g, paddle1);
 	    	 paintSprite(g, paddle2);
-	    	 
+	    	 paintScores(g);
+	    	 paintWinner(g);
 	     }
 	 }
+	
+	private final static int WINNER_TEXT_X = 200;
+	private final static int WINNER_TEXT_Y = 200;
+	private final static int WINNER_FONT_SIZE = 40;
+	private final static String WINNER_FONT_FAMILY = "Serif";
+	private final static String WINNER_TEXT = "WIN!";
+
+	private void paintWinner(Graphics g) {
+
+		if(gameWinner != null) {
+			Font winnerFont = new Font(WINNER_FONT_FAMILY, Font.BOLD, WINNER_FONT_SIZE);
+			g.setFont(winnerFont);
+			int xPosition = getWidth() / 2;
+			if(gameWinner == Player.One) {
+				xPosition -= WINNER_TEXT_X;
+			} else if(gameWinner == Player.Two) {
+				xPosition += WINNER_TEXT_X;
+			}
+			g.drawString(WINNER_TEXT, xPosition, WINNER_TEXT_Y);
+		}
+	}
+
+	private void paintScores(Graphics g) {
+         int xPadding = 100;
+         int yPadding = 100;
+         int fontSize = 50; 
+         Font scoreFont = new Font("Serif", Font.BOLD, fontSize);
+         String leftScore = Integer.toString(player1Score);
+         String rightScore = Integer.toString(player2Score);
+         g.setFont(scoreFont);
+         g.drawString(leftScore, xPadding, yPadding);
+        g.drawString(rightScore, getWidth()-xPadding, yPadding);
+    }
 	
 	private void paintSprite(Graphics g, Sprite sprite) {
 		g.setColor(sprite.getColour());
